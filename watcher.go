@@ -54,9 +54,11 @@ func (w *Watcher) Watch() {
 			fileToMove := allFiles[0]
 			os.Rename(w.directoryToWatch+fileToMove.Name(), w.destinationDirectory+fileToMove.Name())
 			fmt.Println("Here Now moving file", fileToMove)
+			initialStat, err = os.Stat(w.directoryToWatch)
+		} else {
+			initialStat = newStat
 		}
 
-		initialStat = newStat
 		if _, err := file.Seek(0, 0); err != nil {
 			panic(err)
 		}
