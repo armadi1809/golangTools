@@ -15,21 +15,22 @@ type Watcher struct {
 
 func (w *Watcher) Watch() {
 	initialStat, err := os.Stat(w.directoryToWatch)
+	if err != nil {
+		log.Fatal("Could not get the initial stats from directory to watch")
+	}
 
 	fmt.Println(initialStat.ModTime())
 	file, err := os.Open(w.directoryToWatch)
-	defer file.Close()
-
 	if err != nil {
 		log.Fatal("Could not open the downloads directory")
 	}
 
-	if err != nil {
-		log.Fatal("Can't read the files in the download folder")
-	}
-
+	defer file.Close()
 	for {
 		allFiles, err := file.ReadDir(-1)
+		if err != nil {
+			log.Fatal("Could not read the directory")
+		}
 
 		sort.Slice(allFiles, func(i, j int) bool {
 			stat, err := os.Stat(w.directoryToWatch + allFiles[i].Name())
@@ -46,9 +47,6 @@ func (w *Watcher) Watch() {
 
 			return timeFirst.After(timeSecond)
 		})
-		if err != nil {
-			log.Fatal("Could not read the directory")
-		}
 		newStat, err := os.Stat(w.directoryToWatch)
 		if newStat.ModTime().After(initialStat.ModTime()) {
 			fileToMove := allFiles[0]
